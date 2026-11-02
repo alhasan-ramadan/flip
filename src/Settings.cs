@@ -1,6 +1,7 @@
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 
 namespace Flip;
 
@@ -76,6 +77,41 @@ sealed class Settings
             return false;
         }
     }
+
+    /// <summary>
+    /// Findet ein gemerktes Gerät wieder, wenn Windows es mit neuer ID angelegt hat: nach einem Treiber-Update
+    /// oder an einem anderen USB-Anschluss. Erkannt am Namen ohne die Nummer, die Windows davorsetzt
+    /// („5- USB AUDIO CODEC“), und nur, wenn genau ein aktives Gerät so heißt.
+    /// </summary>
+    public bool RelinkMovedDevices()
+    {
+        try
+        {
+            if ((Speaker is null || Audio.IsActive(Speaker.Id)) && (Headphones is null || Audio.IsActive(Headphones.Id)))
+                return false;
+            var outputs = Audio.ActiveOutputs();
+            AudioDevice? Relink(AudioDevice? device)
+            {
+                if (device is null || outputs.Any(d => d.Id == device.Id))
+                    return device;
+                var matches = outputs.Where(d => WithoutNumber(d.Name) == WithoutNumber(device.Name)).ToList();
+                if (matches.Count != 1)
+                    return device;
+                Log.Write($"Wiedergefunden: {device.Name} -> {matches[0].Name} ({matches[0].Id})");
+                return matches[0];
+            }
+            var (speaker, headphones) = (Speaker, Headphones);
+            (Speaker, Headphones) = (Relink(Speaker), Relink(Headphones));
+            return Speaker != speaker || Headphones != headphones;
+        }
+        catch (COMException ex)
+        {
+            Log.Write($"Geräte nicht lesbar: {ex.Message}");
+            return false;
+        }
+    }
+
+    static string WithoutNumber(string name) => Regex.Replace(name, @"\(\d+- ", "(");
 }
 
 /// <summary>

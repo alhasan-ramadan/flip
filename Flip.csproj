@@ -12,7 +12,7 @@
     <InvariantGlobalization>true</InvariantGlobalization>
     <AssemblyName>Flip</AssemblyName>
     <RootNamespace>Flip</RootNamespace>
-    <Version>0.1.0</Version>
+    <Version>0.1.1</Version>
     <Product>FLIP</Product>
     <Description>FLIP – Fast Loudspeaker / In-ear Profiles. Wechselt per Klick zwischen Lautsprecher und Kopfhörer und schaltet Klangprofile für Equalizer APO.</Description>
   </PropertyGroup>

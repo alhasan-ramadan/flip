@@ -16,7 +16,7 @@ sealed class TrayApp : ApplicationContext
 
     public TrayApp()
     {
-        if (settings.FillMissingDevices())
+        if (settings.RelinkMovedDevices() | settings.FillMissingDevices())
         {
             settings.Save();
             Log.Write($"Geräte: Lautsprecher = {settings.Speaker?.Name ?? "-"}, Kopfhörer = {settings.Headphones?.Name ?? "-"}");
@@ -38,7 +38,7 @@ sealed class TrayApp : ApplicationContext
 
         // Windows meldet jeden Wechsel, auch aus den Soundeinstellungen oder wenn sich eine Bluetooth-Box verbindet.
         var ui = SynchronizationContext.Current;
-        Audio.Changed += () => ui?.Post(_ => UpdateIcon(), null);
+        Audio.Changed += () => ui?.Post(_ => OnDevicesChanged(), null);
         try
         {
             Audio.Watch();
@@ -51,6 +51,14 @@ sealed class TrayApp : ApplicationContext
 
         UpdateIcon();
         icon.Visible = true;
+    }
+
+    // Kommt ein gemerktes Gerät mit neuer ID zurück (Treiber-Update, anderer USB-Anschluss), gleich übernehmen.
+    void OnDevicesChanged()
+    {
+        if (settings.RelinkMovedDevices())
+            settings.Save();
+        UpdateIcon();
     }
 
     void Show(SwitchResult result)

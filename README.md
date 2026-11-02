@@ -8,6 +8,7 @@
 - **Linksklick:** wechselt. FLIP stellt alle drei Windows-Rollen um (Standard, Multimedia, Kommunikation). Programme, die auf „Standard“ stehen, wechseln also mit, auch Discord.
 - **Rechtsklick:** Lautsprecher oder Kopfhörer direkt wählen, Klangprofil am Kopfhörer, „Geräte festlegen“, „Mit Windows starten“, „Beenden“.
 - **Erster Start:** Kopfhörer wird das Gerät für Kommunikation, Lautsprecher das Standardgerät oder, wenn beides dasselbe ist, das nächste Gerät. Ton über HDMI/DisplayPort (Monitore) kommt nur in Frage, wenn es nichts anderes gibt. Unter „Geräte festlegen“ lässt sich das ändern.
+- **Neue Geräte-ID:** Nach einem Treiber-Update oder an einem anderen USB-Anschluss legt Windows ein Gerät manchmal mit neuer ID an. FLIP findet es dann am Namen wieder (ohne die Nummer davor, also „5- USB AUDIO CODEC“ wie „USB AUDIO CODEC“), solange genau ein aktives Gerät so heißt.
 
 Neue Symbole legt Windows zuerst in den Überlauf (^ neben der Uhr). Zum Anheften in die Taskleiste ziehen.
 
@@ -20,11 +21,13 @@ Ohne diesen Schritt funktioniert nur das Umschalten.
 3. In `config.txt` den Kopfhörer eintragen und die Datei einbinden, die FLIP schreibt:
 
    ```
-   Device: {8da3dcf7-eba7-4d4a-a45b-7db7d679d87d}
+   Device: USB AUDIO CODEC Lautsprecher
    Include: flip-aktiv.txt
    ```
 
-   Die GUID ist der Teil der Geräte-ID nach dem Punkt; `Flip.exe --dump` zeigt alle IDs.
+   Hinter `Device:` stehen Wörter aus Gerätename und Anschluss, so wie die Soundeinstellungen sie zeigen; alle müssen vorkommen. Das übersteht neue Geräte-IDs. Eine feste GUID geht auch (der Teil der Geräte-ID nach dem Punkt; `Flip.exe --dump` zeigt alle IDs), ist aber nach einem Treiber-Update weg.
+
+   Nach einem Treiber-Update, das Windows die Geräte neu anlegen lässt, muss der Kopfhörer im „Device Selector“ erneut angehakt werden.
 
 FLIP ändert nur `flip-aktiv.txt`. Equalizer APO merkt die Änderung und lädt sofort neu, ohne Neustart.
 
